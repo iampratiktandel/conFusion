@@ -4,7 +4,9 @@ module.exports = function(grunt) {
     
     require('time-grunt')(grunt);
 
-    require('jit-grunt')(grunt);
+    require('jit-grunt')(grunt, {
+        useminPrepare: 'grunt-usemin'
+    });
     
     grunt.initConfig({
         sass: {
@@ -63,12 +65,81 @@ module.exports = function(grunt) {
         imagemin: {
             dynamic: {
                 files: [{
-                    expand: true,
-                    dot: true,
-                    cwd: './',
-                    src: ['img/*.{png,jpg,gif}'],
-                    dest: 'dist/'
+                    expand: true,                  // Enable dynamic expansion
+                    cwd: './',                   // Src matches are relative to this path
+                    src: ['img/*.{png,jpg,gif}'],   // Actual patterns to match
+                    dest: 'dist/img'                  // Destination path prefix
                 }]
+            }
+        },
+        useminPrepare: {
+            foo: {
+                dest: 'dist',
+                src: ['contactus.html', 'aboutus.html', 'index.html']
+            },
+            options: {
+                flow: {
+                    steps: {
+                        css: ['cssmin'],
+                        js: ['uglify']
+                    },
+                    post: {
+                        css: [{
+                            name: 'cssmin',
+                            createConfig: function (context, block) {
+                                var generated = context.options.generated;
+                                generated.options = {
+                                    keepSpecialComments: 0, rebase: false
+                                };
+                            }
+                        }]
+                    }
+                }
+            },
+            concat: {
+                options: {
+                    separator: ';'
+                },
+                dist: {}
+            },
+            uglify: {
+                dist: {}
+            },
+            cssmin: {
+                dtst: {}
+            },
+            filerev: {
+                options: {
+                    encoding: 'utf8',
+                    algorithm: 'md5',
+                    length: 20
+                },
+                release: {
+                    files: [{
+                        src: [
+                            'dist/js/*.js',
+                            'disct/css/*.css'
+                        ]
+                    }]
+                }
+            },
+            usemin: {
+                html: ['dist/contactus.html', 'dist/aboutus.html', 'dist/index.html'],
+                options: {
+                    assetsDirs: ['dist', 'dist/css', 'dist/js']
+                }
+            },
+            htmlmin: {
+                dist: {
+                    options: {
+                        collapseWhitespace: true
+                    },
+                    files: {
+                        'dist/index.html': 'dist/inex.html',
+                        'dist/contactus.html': 'dist/contactus.html',
+                        'dits/aboutus.html': 'dist/aboutus.html'
+                    }
+                }
             }
         }
     });
@@ -78,6 +149,13 @@ module.exports = function(grunt) {
     grunt.registerTask('build', [
         'clean',
         'copy',
-        'imagemin'
+        'imagemin',
+        'useminPrepare',
+        'concat',
+        'cssmin',
+        'uglify',
+        'filerev',
+        'usemin',
+        'htmlmin',
     ]);
 };
